@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: daily-journal
+# uuid: kc-daily-5-minute-journal
+# key: <5minj
+# condition: t
+# --
+* What am I thankful for?
+
+* What would make today great?
+
+* Daily affirmation
+
+* Three amazing things that happened today?
+
+* How could I have made today better?
