@@ -68,9 +68,22 @@
         :desc "org-roam-capture" "c" #'org-roam-capture)
   (setq org-roam-directory "~/Dropbox/org-roam"
         org-roam-db-location "~/Dropbox/org-roam/org-roam.db"
-        org-roam-graph-exclude-matcher "private")
+        org-roam-graph-exclude-matcher "private"))
+
+
   :config
   (require 'org-roam-protocol)
+  (setq org-roam-graph-viewer "/usr/bin/open")
+  (setq org-roam-ref-capture-templates
+        '(("r" "ref" plain (function org-roam-capture--get-point)
+           "%?"
+           :file-name "websites/${slug}"
+           :head "#+TITLE: ${title}
+#+ROAM_KEY: ${ref}
+- source :: ${ref}"
+           :unnarrowed t)))
+
+
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
@@ -84,9 +97,7 @@
            :unnarrowed t)
           ("l" "Link" entry (file+headline "~/Dropbox/org-roam/links.org" "Links")
            "* %a %^g\n %?\n %i")
-          )))
-
-
+          ))
 
 (use-package deft
   :after org
@@ -97,7 +108,11 @@
   (deft-use-filter-string-for-filename t)
   (deft-default-extension "org")
   (deft-directory "~/Dropbox/org-roam"))
+(setq rmh-elfeed-org-files "~/.elfeed/elfeed.org")
+(require 'find-lisp)
 (setq kevin/org-agenda-directory "~/Dropbox/org-roam/")
+(setq org-agenda-files
+        (find-lisp-find-files kevin/org-agenda-directory "\.org$"))
 (use-package! org-journal
   :bind
   ("C-c n j" . org-journal-new-entry)
@@ -128,4 +143,3 @@
 (require 'org-download)
 ;; Drag-and-drop toxxss `dired`
 (add-hook 'dired-mode-hook 'org-download-enable)
-

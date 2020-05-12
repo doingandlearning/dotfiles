@@ -4,19 +4,15 @@
 ;; To install a package with Doom you must declare them here, run 'doom sync' on
 ;; the command line, then restart Emacs for the changes to take effect.
 ;; Alternatively, use M-x doom/reload.
-;;
-;; WARNING: Disabling core packages listed in ~/.emacs.d/core/packages.el may
-;; have nasty side-effects and is not recommended.
 
 
-;; All of Doom's packages are pinned to a specific commit, and updated from
-;; release to release. To un-pin all packages and live on the edge, do:
-;(unpin! t)
-
-;; ...but to unpin a single package:
+;; Doom's packages are pinned to a specific commit and updated from release to
+;; release. The `unpin!' macro allows you to unpin single packages...
 ;(unpin! pinned-package)
-;; Use it to unpin multiple packages
+;; ...or multiple packages
 ;(unpin! pinned-package another-pinned-package)
+;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
+;(unpin! t)
 
 
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
@@ -49,29 +45,9 @@
 ;; This is required for some packages whose default branch isn't 'master' (which
 ;; our package manager can't deal with; see raxod502/straight.el#279)
 ;(package! builtin-package :recipe (:branch "develop"))
-
-(package! dired-narrow)
-(package! deadgrep)
-(package! easy-kill)
-(package! org-clock-convenience)
-(package! company-posframe)
 (package! org-roam
-  :recipe (:host github :repo "jethrokuan/org-roam"))
-(package! org-journal)
-(package! org-ref-ox-hugo
-  :recipe (:host github :repo "jethrokuan/org-ref-ox-hugo" :branch "custom/overrides"))
-(package! org-gcal)
-(package! mathpix.el
-  :recipe (:host github :repo "jethrokuan/mathpix.el"))
-(package! slack)
-(package! anki-editor)
-(package! gif-screencast
-  :recipe (:host gitlab :repo "ambrevar/emacs-gif-screencast"))
-(package! modus-operandi-theme)
-(package! outshine)
+  :recipe (:host github :repo "jethrokuan/org-roam" :branch "develop"))
+(package! prettier-js)
+(package! vue-mode)
 (package! company-org-roam
   :recipe (:host github :repo "jethrokuan/company-org-roam"))
-(package! emr)
-(package! spell-fu
-  :recipe (:host gitlab :repo "ideasman42/emacs-spell-fu"))
-(package! org-download)

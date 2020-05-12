@@ -50,6 +50,7 @@
 ;;
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
+
 (use-package! org-roam
   :commands (org-roam-insert org-roam-find-file org-roam-switch-to-buffer org-roam)
   :hook
@@ -69,8 +70,29 @@
   (setq org-roam-directory "~/Dropbox/org-roam"
         org-roam-db-location "~/Dropbox/org-roam/org-roam.db"
         org-roam-graph-exclude-matcher "private")
+  (setq org-roam-ref-capture-templates
+        '(("r" "ref" plain (function org-roam-capture--get-point)
+           "%?"
+           :file-name "websites/${slug}"
+           :head "#+TITLE: ${title}
+#+ROAM_KEY: ${ref}
+- source :: ${ref}"
+           :unnarrowed t)
+           (("q" "ref" plain (function org-roam-capture--get-point)
+           "%?"
+           :file-name "websites/${slug}"
+           :head "#+TITLE: ${title}
+#+ROAM_KEY: ${ref}
+- source :: ${ref}"
+           :unnarrowed t))
+           )))
+      
+
+
   :config
   (require 'org-roam-protocol)
+  (setq org-roam-graph-viewer "/usr/bin/open")
+
   (setq org-roam-capture-templates
         '(("d" "default" plain (function org-roam--capture-get-point)
            "%?"
@@ -84,9 +106,7 @@
            :unnarrowed t)
           ("l" "Link" entry (file+headline "~/Dropbox/org-roam/links.org" "Links")
            "* %a %^g\n %?\n %i")
-          )))
-
-
+          ))
 
 (use-package deft
   :after org
@@ -97,7 +117,7 @@
   (deft-use-filter-string-for-filename t)
   (deft-default-extension "org")
   (deft-directory "~/Dropbox/org-roam"))
-
+(setq rmh-elfeed-org-files "~/.elfeed/elfeed.org")
 (require 'find-lisp)
 (setq kevin/org-agenda-directory "~/Dropbox/org-roam/")
 (setq org-agenda-files
@@ -115,21 +135,56 @@
   (defun org-journal-today ()
     (interactive)
     (org-journal-new-entry t)))
-(setq org-capture-templates
-      `(("i" "inbox" entry (file ,(concat kevin/org-agenda-directory "inbox.org"))
-         "* TODO %?")
-        ("e" "email" entry (file+headline ,(concat kevin/org-agenda-directory "emails.org") "Emails")
-         "* TODO [#A] Reply: %a :@home:@work:" :immediate-finish t)
-        ("l" "link" entry (file ,(concat kevin/org-agenda-directory "inbox.org"))
-         "* TODO %(org-cliplink-capture)" :immediate-finish t)
-        ("c" "org-protocol-capture" entry (file ,(concat kevin/org-agenda-directory "inbox.org"))
-         "* TODO [[%:link][%:description]]\n\n %i" :immediate-finish t)))
-(require 'org-gcal)
-(setq org-gcal-client-id "660340819767-g2c81h7pj3jene7uc3a64bc7m9mblh2q.apps.googleusercontent.com"
-      org-gcal-client-secret "qPFh0xxkRER91ewMTfS2V6ns"
-      org-gcal-file-alist '(("kev.cunningham@gmail.com" .  "~/schedule.org")
-                            ("kev.cunningham@gmail.com" .  "~/task.org")))
-(require 'org-download)
+
+
+(setq org-capture-templates `(
+	("p" "Protocol" entry (file+headline "~/Dropbox/org-roam/inbox.org" "Inbox")
+        "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
+
+
+;;("p" "ref" entry (function org-roam-capture--get-point)
+;;           "%?"
+;;           :file-name "websites/${url}"
+;;           :head "#+TITLE: ${title}
+;;#+ROAM_KEY: ${ref}
+;;- source :: ${ref}
+;;#+BEGIN_QUOTE
+;;${body}
+;;#+END_QUOTE"
+;;           :unnarrowed t)
+
+                              ("L" "Protocol Link" entry (file+headline "~/Dropbox/org-roam/inbox.org" "Inbox")
+        "* %? [[%:link][\"%:description\"]]\n")
+))
+;;
+;; (require 'org-gcal)
+;; (setq org-gcal-client-id "660340819767-g2c81h7pj3jene7uc3a64bc7m9mblh2q.apps.googleusercontent.com"
+;;      org-gcal-client-secret "qPFh0xxkRER91ewMTfS2V6ns"
+;;      org-gcal-file-alist '(("kev.cunningham@gmail.com" .  "~/schedule.org")
+;;                            ("kev.cunningham@gmail.com" .  "~/task.org")))
+;; (require 'org-download)
 ;; Drag-and-drop toxxss `dired`
 (add-hook 'dired-mode-hook 'org-download-enable)
 
+
+  (setq org-roam-graph-viewer "/usr/bin/open")
+
+
+
+;; Transclude lines from one file to another
+(defun org-dblock-write:transclusion (params)
+  (progn
+    (with-temp-buffer
+      (insert-file-contents (plist-get params :filename))
+      (let ((range-start (or (plist-get params :min) (line-number-at-pos (point-min))))
+            (range-end (or (plist-get params :max) (line-number-at-pos (point-max)))))
+        (copy-region-as-kill (line-beginning-position range-start)
+                             (line-end-position range-end))))
+    (yank)))
+
+;; Prettier
+(add-hook!
+  js2-mode 'prettier-js-mode
+  (add-hook 'before-save-hook #'refmt-before-save nil t))
+
+(setq rmh-elfeed-org-files "~/.elfeed/elfeed.org")

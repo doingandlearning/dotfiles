@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: egghead-lesson-template
+# uuid: egghead-lesson-template
+# key: <ehlt
+# condition: t
+# --
+** egghead lesson
+* Title
+
+* Summary
+
+* In this lesson
+
+* Steps
+
+* Diff
