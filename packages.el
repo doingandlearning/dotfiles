@@ -45,9 +45,16 @@
 ;; This is required for some packages whose default branch isn't 'master' (which
 ;; our package manager can't deal with; see raxod502/straight.el#279)
 ;(package! builtin-package :recipe (:branch "develop"))
-(package! org-roam
-  :recipe (:host github :repo "jethrokuan/org-roam" :branch "develop"))
 (package! prettier-js)
 (package! vue-mode)
 (package! company-org-roam
   :recipe (:host github :repo "jethrokuan/company-org-roam"))
+(package! elfeed)
+(package! org-roam-server :recipe (:host github :repo "org-roam/org-roam-server" :files ("*")))
+(package! org-noter)
+(package! org-pdftools)
+(package! org-noter-pdftools)
+(package! org-ref)
+(package! helm-bibtex)
+(package! org-noter-pdf-tools)
+(package! org-roam-bibtex)

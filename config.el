@@ -23,7 +23,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-monokai-pro)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -140,20 +140,7 @@
 (setq org-capture-templates `(
 	("p" "Protocol" entry (file+headline "~/Dropbox/org-roam/inbox.org" "Inbox")
         "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
-
-
-;;("p" "ref" entry (function org-roam-capture--get-point)
-;;           "%?"
-;;           :file-name "websites/${url}"
-;;           :head "#+TITLE: ${title}
-;;#+ROAM_KEY: ${ref}
-;;- source :: ${ref}
-;;#+BEGIN_QUOTE
-;;${body}
-;;#+END_QUOTE"
-;;           :unnarrowed t)
-
-                              ("L" "Protocol Link" entry (file+headline "~/Dropbox/org-roam/inbox.org" "Inbox")
+  ("L" "Protocol Link" entry (file+headline "~/Dropbox/org-roam/inbox.org" "Inbox")
         "* %? [[%:link][\"%:description\"]]\n")
 ))
 ;;
@@ -165,6 +152,7 @@
 ;; (require 'org-download)
 ;; Drag-and-drop toxxss `dired`
 (add-hook 'dired-mode-hook 'org-download-enable)
+(use-package! org-roam-server)
 
 
   (setq org-roam-graph-viewer "/usr/bin/open")
@@ -188,3 +176,147 @@
   (add-hook 'before-save-hook #'refmt-before-save nil t))
 
 (setq rmh-elfeed-org-files "~/.elfeed/elfeed.org")
+     (use-package elfeed
+       :bind ("C-c f" . elfeed)
+       :init
+       (setq my/default-elfeed-search-filter "@1-month-ago +unread !sport ")
+       (setq-default elfeed-search-filter my/default-elfeed-search-filter)
+       :config
+       (elfeed)
+
+       ;;
+       ;; linking and capturing
+       ;;
+
+       (defun elfeed-link-title (entry)
+         "Copy the entry title and URL as org link to the clipboard."
+         (interactive)
+         (let* ((link (elfeed-entry-link entry))
+                (title (elfeed-entry-title entry))
+                (titlelink (concat "[[" link "][" title "]]")))
+           (when titlelink
+             (kill-new titlelink)
+             (x-set-selection 'PRIMARY titlelink)
+             (message "Yanked: %s" titlelink))))
+
+       ;; show mode
+
+       (defun elfeed-show-link-title ()
+         "Copy the current entry title and URL as org link to the clipboard."
+         (interactive)
+         (elfeed-link-title elfeed-show-entry))
+
+       (defun elfeed-show-quick-url-note ()
+         "Fastest way to capture entry link to org agenda from elfeed show mode"
+         (interactive)
+         (elfeed-link-title elfeed-show-entry)
+         (org-capture nil "n")
+         (yank)
+         (org-capture-finalize))
+
+       (bind-keys :map elfeed-show-mode-map
+                  ("l" . elfeed-show-link-title)
+                  ("v" . elfeed-show-quick-url-note))
+
+       ;; search mode
+
+       (defun elfeed-search-link-title ()
+         "Copy the current entry title and URL as org link to the clipboard."
+         (interactive)
+         (let ((entries (elfeed-search-selected)))
+           (cl-loop for entry in entries
+                    when (elfeed-entry-link entry)
+                    do (elfeed-link-title entry))))
+
+       (defun elfeed-search-quick-url-note ()
+         "In search mode, capture the title and link for the selected
+     entry or entries in org aganda."
+         (interactive)
+         (let ((entries (elfeed-search-selected)))
+           (cl-loop for entry in entries
+                    do (elfeed-untag entry 'unread)
+                    when (elfeed-entry-link entry)
+                    do (elfeed-link-title entry)
+                    do (org-capture nil "n")
+                    do (yank)
+                    do (org-capture-finalize)
+                    (mapc #'elfeed-search-update-entry entries))
+           (unless (use-region-p) (forward-line))))
+
+       (bind-keys :map elfeed-search-mode-map
+                  ("l" . elfeed-search-link-title)
+                  ("v" . elfeed-search-quick-url-note)))
+(setq
+ org_notes "~/Dropbox/org-roam"
+ zot_bib "~/Dropbox/master.bib"
+ org-default-notes-file (concat org_notes "/inbox.org"))
+(use-package! org-noter
+  :after (:any org pdf-view)
+  :config
+    (setq
+    ;; The WM can handle splits
+     org-noter-notes-window-location 'other-frame
+     ;; Please stop opening frames
+     org-noter-always-create-frame nil
+     ;; I want to see the whole file
+     org-noter-hide-other nil
+     ;; Everything is relative to the main notes file
+     org-noter-notes-search-path (list org_notes)
+   )
+  )
+(use-package org-pdftools
+  :hook (org-load . org-pdftools-setup-link))
+(use-package org-noter-pdftools
+  :after org-noter
+  :config
+  (with-eval-after-load 'pdf-annot
+    (add-hook 'pdf-annot-activate-handler-functions#'org-noter-pdftools-jump-to-note)))
+(setq
+ bibtex-completion-notes-path org_notes
+ bibtex-completion-bibliography zot_bib
+ bibtex-completion-pdf-field "file"
+ bibtex-completion-notes-template-multiple-files
+ (concat
+  "#+TITLE: ${title}\n"
+  "#+ROAM_KEY: cite:${=key=}\n"
+  "* TODO Notes\n"
+  ":PROPERTIES:\n"
+  ":Custom_ID: ${=key=}\n"
+  ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
+  ":AUTHOR: ${author-abbrev}\n"
+  ":JOURNAL: ${journaltitle}\n"
+  ":DATE: ${date}\n"
+  ":YEAR: ${year}\n"
+  ":DOI: ${doi}\n"
+  ":URL: ${url}\n"
+  ":END:\n\n"
+  )
+ )
+
+(use-package! org-ref
+    :config
+    (setq
+         org-ref-completion-library 'org-ref-ivy-cite
+         org-ref-get-pdf-filename-function 'org-ref-get-pdf-filename-helm-bibtex
+         org-ref-default-bibliography (list zot_bib)
+         org-ref-bibliography-notes (concat org_notes "/bibnotes.org")
+         org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n"
+         org-ref-notes-directory org_notes
+         org-ref-notes-function 'orb-edit-notes
+         ))
+
+(use-package org-roam-bibtex
+  :after (org-roam)
+  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :config
+  (setq orb-preformat-keywords
+   '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
+  (setq orb-templates
+        '(("r" "ref" plain (function org-roam-capture--get-point)
+           ""
+           :file-name "${slug}"
+           :head "#+TITLE: ${=key=}: ${title}\n#+ROAM_KEY: ${ref}
+- tags ::
+- keywords :: ${keywords}
+\n* ${title}\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
+           :unnarrowed t))))
