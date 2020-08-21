@@ -463,6 +463,5 @@
 
 (after! org
   (add-to-list 'org-modules 'org-habit))
-
 ;;(map! :leader 
 ;;      :desc "Open like spacemacs" "SPC" #'counsel-M-x)
