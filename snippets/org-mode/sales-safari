@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: Sales Safari
+# key: ssaf
+# --
+
+** URL:
+DATE: `(format-time-string "%Y-%m-%d")`$0
+
+** Pain
+the posters' pains (current, past, implied)
+
+** Jargon
+terms of art, technical lingo, community phrases
+
+** Worldviews
+
+** Recommendations
+advice what to buy, read, share, try... or NOT to

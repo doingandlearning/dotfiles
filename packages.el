@@ -1,4 +1,5 @@
 ;; -*- no-byte-compile: t; -*-
+;;
 ;;; $DOOMDIR/packages.el
 
 ;; To install a package with Doom you must declare them here, run 'doom sync' on
@@ -47,10 +48,7 @@
 ;(package! builtin-package :recipe (:branch "develop"))
 (package! prettier-js)
 ;(package! vue-mode)
-(package! company-org-roam
-  :recipe (:host github :repo "jethrokuan/company-org-roam"))
 ;(package! elfeed)
-(package! org-roam-server :recipe (:host github :repo "org-roam/org-roam-server" :files ("*")))
 (package! org-noter)
 (package! org-pdftools)
 (package! org-noter-pdftools)
@@ -73,7 +71,6 @@
   :recipe (:host github :repo "Fuco1/org-pretty-table") :pin "88380f865a...")
 (package! ox-gfm)
 (package! org-chef)
-(unpin! org-roam)
 (package! org-pandoc-import
   :recipe (:host github
            :repo "tecosaur/org-pandoc-import"
@@ -88,14 +85,15 @@
 (package! easy-kill)
 (package! org-clock-convenience)
 (package! company-posframe)
-(package! org-roam
-  :recipe (:host github :repo "org-roam/org-roam"))
 (package! modus-operandi-theme)
 (package! outshine)
-(package! company-org-roam
-  :recipe (:host github :repo "jethrokuan/company-org-roam"))
-(package! org-roam-server
-  :recipe (:host github :repo "org-roam/org-roam-server"))
+(unpin! org-roam)
+(unpin! org-roam-server)
+(unpin! company-org-roam)
 (package! emmet-mode)
 (package! write-good
   :recipe (:host github :repo "bnbeckwith/writegood-mode"))
+(package! engine-mode
+  :recipe (:host github :repo "hrs/engine-mode" :branch "main"))
+(package! multi-vterm)
+(package! org-gcal)

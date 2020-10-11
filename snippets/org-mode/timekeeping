@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
 # name: timekeeping
 # uuid: timekeepin
-# key: trigger-key
+# key: tktab
 # condition: t
 # --
 |--------+-------+------------------------------------|

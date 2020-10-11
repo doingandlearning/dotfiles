@@ -12,10 +12,15 @@
       doom-big-font (font-spec :family "Iosevka" :size 40)
       doom-variable-pitch-font (font-spec :family "Libre Baskerville")
       doom-serif-font (font-spec :family "Libre Baskerville")
+      calendar-latitude 50.819519
+      calendar-longitude -0.136420
+      calendar-location-name "Brighton"
       doom-theme 'modus-operandi)
 
 (setq org-directory "~/org/"
       org-ellipsis " ▼ "
+      org-deadline-warning-days 7
+      org-agenda-breadcrumbs-separator " ❱ "
       org-adapt-indentation nil
       search-highlight t
       search-whitespace-regexp ".*?"
@@ -39,6 +44,8 @@
       doom-fallback-buffer-name "► Doom"
       +doom-dashboard-name "► Doom")
 
+(setenv "PATH" (concat (getenv "PATH") ":/Library/TeX/texbin"))
+
 (remove-hook!
   'doom-first-buffer-hook #'smartparens-global-mode
   '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
@@ -59,7 +66,7 @@
   (map! :map helm-map
         "<tab>"   #'helm-execute-persistent-action))
 (setq helm-autoresize-max-height 0
-      helm-autoresize-min-height 40
+         helm-autoresize-min-height 40
       helm-M-x-fuzzy-match t
       helm-buffers-fuzzy-matching t
       helm-display-header-line t
@@ -72,7 +79,7 @@
 ;; some default settings from https://tecosaur.github.io/emacs-config/config.html#rudimentary-configuration
 (setq-default
  tab-width 2
- )
+)
 
 ;; mode-line settings
 (display-time-mode 1)
@@ -168,12 +175,22 @@
          :file-name "${slug}"
          :head "#+TITLE: ${title}\n#+ROAM_ALIAS: \n#i+SOURCE: \n- tags:: \n\n"
          :unnarrowed t)
+        ("P" "person" plain (function org-roam--capture-get-point)
+"- tags::
+* How We Met
+* Company
+* Location
+* Interests
+* Interesting facts"
+         :filename "${slug}"
+         :head "#+TITLE: ${title}\n"
+         :unnarrowed t)
    ))
-  )
-      
   :config
   (require 'org-roam-protocol)
   (setq org-roam-graph-viewer "/usr/bin/open")
+  )
+
 
 
 (after! (org-roam)
@@ -411,12 +428,22 @@
   (setq org-download-screenshot-method "screencapture -i %s")
   (setq org-download-method '+org/org-download-method))
 
+
 ;; Goto files
 (map! :leader
       (:prefix "o" (
       :desc "Open GTD"      "g" (lambda () (interactive) (find-file "~/Dropbox/gtd/gtd.org"))
       :desc "Open inbox"    "i" (lambda () (interactive) (find-file "~/Dropbox/gtd/inbox.org"))
       )))
+
+(map!
+      :desc "Toggle neotree" "s-b" (lambda () (interactive) (neotree-toggle) ))
+
+(map! :leader
+      (:prefix "p" (
+        :desc "Search in project" "P" #'+ivy/project-search)))
+
+(map! "C-c c" #'org-capture)
 
 (use-package! rjsx-mode
   :mode "\\.js\\'")
@@ -459,9 +486,83 @@
            "clearly"               ;; Is the premise undeniably true?
            "experience shows"      ;; Whose? What kind? How does it do so?
            "may have"              ;; It may also have not!
-           "it turns out that"))) 
+           "it turns out that"))
+(setq-hook! org-mode
+  org-log-done t
+  org-image-actual-width '(700)
+  org-clock-into-drawer t
+  org-clock-persist t
+  org-columns-default-format "%60ITEM(Task) %20TODO %10Effort(Effort){:} %10CLOCKSUM"
+  org-global-properties (quote (("Effort_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00")
+                                ("STYLE_ALL" . "habit")))
+  ;; org-plantuml-jar-path (expand-file-name "~/Downloads/plantuml.jar")
+  ;; org-export-babel-evaluate nil
+  org-confirm-babel-evaluate nil
+  ;; org-todo-keywords '((sequence "TODO" "WAITING" "|" "DONE"))
+  org-archive-location "~/Notes/archive/todo.org.gpg::"
+  org-duration-format '((special . h:mm))
+  org-time-clocksum-format (quote (:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
+  bidi-paragraph-direction t
+  org-hide-emphasis-markers t
+  org-fontify-done-headline t
+  org-fontify-whole-heading-line t
+  org-fontify-quote-and-verse-blocks t
+  ))
 
-(after! org
-  (add-to-list 'org-modules 'org-habit))
-;;(map! :leader 
-;;      :desc "Open like spacemacs" "SPC" #'counsel-M-x)
+
+;; (after! org
+;;   (add-to-list 'org-modules 'org-habit)
+;;   ;;(map! :leader 
+;; ;;      :desc "Open like spacemacs" "SPC" #'counsel-M-x)
+;; (add-to-list 'default-frame-alist '(inhibit-double-buffering . t)
+;; )
+
+(use-package! engine-mode)
+
+(defengine duckduckgo
+  "https://duckduckgo.com/?q=%s"
+  :keybinding "d")
+
+(defengine google
+  "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s"
+  :keybinding "g")
+
+(defengine github
+  "https://github.com/search?ref=simplesearch&q=%s"
+  :keybinding "h")
+
+(defengine google-images
+  "http://www.google.com/images?hl=en&source=hp&biw=1440&bih=795&gbv=2&aq=f&aqi=&aql=&oq=&q=%s"
+  :keybinding "i")
+
+(defengine google-maps
+  "http://maps.google.com/maps?q=%s"
+  :docstring "Mappin' it up."
+  :keybinding "m")
+
+(defengine twitter
+  "https://twitter.com/search?q=%s"
+  :keybinding "t")
+
+(defengine wikipedia
+  "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
+  :keybinding "w"
+  :docstring "Searchin' the wikis.")
+
+
+(global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
+(global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
+
+(use-package! org-gcal)
+(setq org-gcal-client-id "660340819767-r5s2715qsgvuq8tajum2pm59a0v07avj.apps.googleusercontent.com"
+      org-gcal-client-secret "Vuc1rFvG8EiaCZ3bNjrFSn6c"
+      org-gcal-fetch-file-alist '(("kev.cunningham@gmail.com" . "~/Dropbox/gtd/schedule.org")))(setq visible-bell nil)
+(add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
+(defun add-property-with-date-captured ()
+  "Add DATE_CAPTURED property to the current item."
+  (interactive)
+  (org-set-property "CREATED" (format-time-string "%F")))
+
+(add-hook 'org-capture-before-finalize-hook 'add-property-with-date-captured)
+
+
