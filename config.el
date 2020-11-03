@@ -39,7 +39,7 @@
 (load! "+modeline")
 (load! "+org-mode")
 (load! "+secrets")
-
+(load! "+magit")
 (remove-hook!
   'doom-first-buffer-hook #'smartparens-global-mode
   '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)

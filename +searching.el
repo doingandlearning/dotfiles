@@ -1,8 +1,5 @@
 ;;; +searching.el -*- lexical-binding: t; -*-
 
-
-
-
 (use-package! engine-mode)
 
 (defengine duckduckgo

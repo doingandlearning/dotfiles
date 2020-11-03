@@ -3,7 +3,7 @@
 
 
 (use-package! org-roam
-  :commands (org-roam-insert org-roam-find-file org-roam-switch-to-buffer org-roam)
+  :commands (org-roam-insert org-roam-find-file org-roam-switch-to-buffer org-roam org-roam-completion-ignore-case)
   :hook
   (after-init . org-roam-mode)
   :custom-face
@@ -220,3 +220,11 @@
   ))
 (use-package! org-gcal)
 (map! "C-c c" #'org-capture)
+
+(key-chord-define org-mode-map "[[" #'my/insert-roam-link)
+
+(defun my/insert-roam-link ()
+    "Inserts an Org-roam link."
+    (interactive)
+    (insert "[[roam:]]")
+    (backward-char 2))
